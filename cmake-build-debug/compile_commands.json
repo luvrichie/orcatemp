@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/Users/richiie/CLionProjects/orca/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/cc -I/Users/richiie/CLionProjects/orca/include -isystem /usr/local/Cellar/raylib/4.2.0/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -mmacosx-version-min=12.6 -fcolor-diagnostics -I/usr/local/Cellar/raylib/4.2.0/include -o CMakeFiles/orca.dir/src/main.c.o -c /Users/richiie/CLionProjects/orca/src/main.c",
+  "file": "/Users/richiie/CLionProjects/orca/src/main.c"
+},
+{
+  "directory": "/Users/richiie/CLionProjects/orca/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/cc -I/Users/richiie/CLionProjects/orca/include -isystem /usr/local/Cellar/raylib/4.2.0/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -mmacosx-version-min=12.6 -fcolor-diagnostics -I/usr/local/Cellar/raylib/4.2.0/include -o CMakeFiles/orca.dir/src/opcodes.c.o -c /Users/richiie/CLionProjects/orca/src/opcodes.c",
+  "file": "/Users/richiie/CLionProjects/orca/src/opcodes.c"
+},
+{
+  "directory": "/Users/richiie/CLionProjects/orca/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/cc -I/Users/richiie/CLionProjects/orca/include -isystem /usr/local/Cellar/raylib/4.2.0/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -mmacosx-version-min=12.6 -fcolor-diagnostics -I/usr/local/Cellar/raylib/4.2.0/include -o CMakeFiles/orca.dir/src/graphics.c.o -c /Users/richiie/CLionProjects/orca/src/graphics.c",
+  "file": "/Users/richiie/CLionProjects/orca/src/graphics.c"
+}
+]
