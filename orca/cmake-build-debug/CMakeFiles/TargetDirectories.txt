@@ -1,3 +1,0 @@
-/Users/richiie/CLionProjects/orca/cmake-build-debug/CMakeFiles/orca.dir
-/Users/richiie/CLionProjects/orca/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/richiie/CLionProjects/orca/cmake-build-debug/CMakeFiles/rebuild_cache.dir

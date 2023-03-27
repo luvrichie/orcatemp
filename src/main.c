@@ -108,6 +108,9 @@ void init(chip_8 *c) {
 
     c->delay_timer = 0;
     c->sound_timer = 0;
+
+    c->memory[0x1FF] = 5;
+    c->memory[0x1FE] = 1;
     printf("[*] init finished!\n");
 }
 

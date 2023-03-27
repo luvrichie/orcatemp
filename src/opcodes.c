@@ -216,16 +216,16 @@ void draw_sprite(chip_8 *c, uint8_t vx, uint8_t vy, uint8_t n) {
     }
 }
 
-// EX9E: skip next instruction if key, that's stored in Vx is pressed
+// EXA1: skip next instruction if key, that's stored in Vx is pressed
 void skip_if_key_pressed(chip_8 *c, uint8_t vx) {
-    if (c->keycur[c->V[vx]] == true) {
+    if (c->keycur[c->V[vx] & 0xF] == true) {
         c->pc += 2;
     }
 }
 
 // EX9E: skip next instruction if key, that's stored in Vx is NOT pressed
 void skip_if_key_not_pressed(chip_8 *c, uint8_t vx) {
-    if (c->keycur[c->V[vx]] == false) {
+    if (c->keycur[c->V[vx] & 0xF] == false) {
         c->pc += 2;
     }
 }
@@ -238,7 +238,7 @@ void set_reg_timer(chip_8 *c, uint8_t vx) {
 // FX0A: halt until key press and store in Vx, and wait for the key to be released
 void wait_for_key(chip_8 *c, uint8_t reg) {
     for (uint8_t k = 0; k < 16; k++) {
-        if (c->keyold[k] && !c->keycur[k]) {
+        if (c->keyold[k] & !c->keycur[k]) {
             c->keyold[k] = false;
             c->V[reg] = k;
             return;
