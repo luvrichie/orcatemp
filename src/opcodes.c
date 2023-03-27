@@ -7,37 +7,6 @@
 #include <raylib.h>
 #include <unistd.h>
 
-// helper func
-void push(chip_8 *c, uint16_t value) {
-    if (c->sp + 1 >= STACK_SIZE - 1) {
-        fprintf(stderr, "stack overflow!!!");
-        return;
-    }
-
-    c->sp++;
-    c->stack[c->sp] = value;
-}
-
-uint16_t pop(chip_8 *c) {
-    if (c->sp == 0) {
-        fprintf(stderr, "stack underflow!!!");
-        return -1;
-    }
-    uint16_t result = c->stack[c->sp];
-    c->sp--;
-    return result;
-}
-
-int current_key_pressed(const uint8_t keys[]) {
-    int result = -1;
-
-    for (int i = 0; i < 16; i++) {
-        if (keys[i] > 0)
-            return i;
-    }
-    return result;
-}
-
 // 00E0: clear display
 // the title says it all; clears chip-8's display.
 void clear_display(chip_8 *c) {
@@ -80,14 +49,14 @@ void call_subroutine(chip_8 *c, uint16_t addr) {
 }
 
 // 3XNN: skip if Vx is equal to nn
-void skip_equal(chip_8 *c, uint8_t vx, uint16_t value) {
+void skip_equal(chip_8 *c, uint8_t vx, uint8_t value) {
     if (c->V[vx] == value) {
         c->pc += 2;
     }
 }
 
 // 4XNN: skip if Vx is NOT equal to nn
-void skip_not_equal(chip_8 *c, uint8_t vx, uint16_t value) {
+void skip_not_equal(chip_8 *c, uint8_t vx, uint8_t value) {
     if (c->V[vx] != value) {
         c->pc += 2;
     }
@@ -249,14 +218,14 @@ void draw_sprite(chip_8 *c, uint8_t vx, uint8_t vy, uint8_t n) {
 
 // EX9E: skip next instruction if key, that's stored in Vx is pressed
 void skip_if_key_pressed(chip_8 *c, uint8_t vx) {
-    if (c->keys[c->V[vx]] == 1) {
+    if (c->keycur[c->V[vx]] == true) {
         c->pc += 2;
     }
 }
 
 // EX9E: skip next instruction if key, that's stored in Vx is NOT pressed
 void skip_if_key_not_pressed(chip_8 *c, uint8_t vx) {
-    if (c->keys[c->V[vx]] == 0) {
+    if (c->keycur[c->V[vx]] == false) {
         c->pc += 2;
     }
 }
@@ -268,13 +237,14 @@ void set_reg_timer(chip_8 *c, uint8_t vx) {
 
 // FX0A: halt until key press and store in Vx, and wait for the key to be released
 void wait_for_key(chip_8 *c, uint8_t reg) {
-    int last_key = current_key_pressed(c->keys);
-    // no key pressed yet, move pc back
-    if (last_key == -1) c->pc -= 2;
-    // key was pressed, storing...
-    c->V[reg] = last_key;
-    // waiting for release
-    if (current_key_pressed(c->keys) == -1) c->pc -= 2;
+    for (uint8_t k = 0; k < 16; k++) {
+        if (c->keyold[k] && !c->keycur[k]) {
+            c->keyold[k] = false;
+            c->V[reg] = k;
+            return;
+        }
+    }
+    c->pc -= 2;
 }
 
 // FX15: set delay timer to Vx

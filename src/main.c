@@ -10,84 +10,84 @@
 
 void updateInput(chip_8 *c) {
     if (IsKeyDown(KEY_ONE)) {
-        c->keys[0x1] = 1;
+        c->keycur[0x1] = true;
     } else if (IsKeyUp(KEY_ONE)) {
-        c->keys[0x1] = 0;
+        c->keycur[0x1] = false;
     }
     if (IsKeyDown(KEY_TWO)) {
-        c->keys[0x2] = 1;
+        c->keycur[0x2] = true;
     } else if (IsKeyUp(KEY_TWO)) {
-        c->keys[0x2] = 0;
+        c->keycur[0x2] = false;
     }
     if (IsKeyDown(KEY_THREE)) {
-        c->keys[0x3] = 1;
+        c->keycur[0x3] = true;
     } else if (IsKeyUp(KEY_THREE)) {
-        c->keys[0x3] = 0;
+        c->keycur[0x3] = false;
     }
     if (IsKeyDown(KEY_FOUR)) {
-        c->keys[0xc] = 1;
+        c->keycur[0xc] = true;
     } else if (IsKeyUp(KEY_FOUR)) {
-        c->keys[0xc] = 0;
+        c->keycur[0xc] = false;
     }
     if (IsKeyDown(KEY_Q)) {
-        c->keys[0x4] = 1;
+        c->keycur[0x4] = true;
     } else if (IsKeyUp(KEY_Q)) {
-        c->keys[0x4] = 0;
+        c->keycur[0x4] = false;
     }
     if (IsKeyDown(KEY_W)) {
-        c->keys[0x5] = 1;
+        c->keycur[0x5] = true;
     } else if (IsKeyUp(KEY_W)) {
-        c->keys[0x5] = 0;
+        c->keycur[0x5] = false;
     }
     if (IsKeyDown(KEY_E)) {
-        c->keys[0x6] = 1;
+        c->keycur[0x6] = true;
     } else if (IsKeyUp(KEY_E)) {
-        c->keys[0x6] = 0;
+        c->keycur[0x6] = false;
     }
     if (IsKeyDown(KEY_R)) {
-        c->keys[0xd] = 1;
+        c->keycur[0xd] = true;
     } else if (IsKeyUp(KEY_R)) {
-        c->keys[0xd] = 0;
+        c->keycur[0xd] = false;
     }
     if (IsKeyDown(KEY_A)) {
-        c->keys[0x7] = 1;
+        c->keycur[0x7] = true;
     } else if (IsKeyUp(KEY_A)) {
-        c->keys[0x7] = 0;
+        c->keycur[0x7] = false;
     }
     if (IsKeyDown(KEY_S)) {
-        c->keys[0x8] = 1;
+        c->keycur[0x8] = true;
     } else if (IsKeyUp(KEY_S)) {
-        c->keys[0x8] = 0;
+        c->keycur[0x8] = false;
     }
     if (IsKeyDown(KEY_D)) {
-        c->keys[0x9] = 1;
+        c->keycur[0x9] = true;
     } else if (IsKeyUp(KEY_D)) {
-        c->keys[0x9] = 0;
+        c->keycur[0x9] = false;
     }
     if (IsKeyDown(KEY_F)) {
-        c->keys[0xE] = 1;
+        c->keycur[0xE] = true;
     } else if (IsKeyUp(KEY_F)) {
-        c->keys[0xE] = 0;
+        c->keycur[0xE] = false;
     }
     if (IsKeyDown(KEY_Z)) {
-        c->keys[0xA] = 1;
+        c->keycur[0xA] = true;
     } else if (IsKeyUp(KEY_Z)) {
-        c->keys[0xA] = 0;
+        c->keycur[0xA] = false;
     }
     if (IsKeyDown(KEY_X)) {
-        c->keys[0x0] = 1;
+        c->keycur[0x0] = true;
     } else if (IsKeyUp(KEY_X)) {
-        c->keys[0x0] = 0;
+        c->keycur[0x0] = false;
     }
     if (IsKeyDown(KEY_C)) {
-        c->keys[0xB] = 1;
+        c->keycur[0xB] = true;
     } else if (IsKeyUp(KEY_C)) {
-        c->keys[0xB] = 0;
+        c->keycur[0xB] = false;
     }
     if (IsKeyDown(KEY_V)) {
-        c->keys[0xF] = 1;
+        c->keycur[0xF] = true;
     } else if (IsKeyUp(KEY_V)) {
-        c->keys[0xF] = 0;
+        c->keycur[0xF] = false;
     }
 }
 
@@ -96,7 +96,8 @@ void init(chip_8 *c) {
     memset(c->display, 0, SCREEN_HEIGHT * SCREEN_WIDTH);
     memset(c->stack, 0, STACK_SIZE);
     memset(c->V, 0, 16);
-    memset(c->keys, 0, 16);
+    memset(c->keycur, 0, 16);
+    memset(c->keyold, 0, 16);
 
     memcpy(c->memory + FONT_ADDR, fontset, 80);
     printf("[*] loaded font-set into memory\n");
@@ -296,6 +297,10 @@ int main() {
         if (rom_loaded) {
             updateInput(&c8);
             if (c8.delay_timer > 0) c8.delay_timer--;
+            for (uint8_t k = 0; k < 16; k++) {
+                c8.keyold[k] = c8.keycur[k];
+                c8.keycur[k] = IsKeyDown(k);
+            }
             for (int a = 0; a <= 8; a++) {
                 step(&c8);
             }

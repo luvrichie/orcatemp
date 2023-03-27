@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifndef ORCA_MAIN_H
 
@@ -48,7 +49,8 @@ typedef struct {
     uint8_t delay_timer;
     uint8_t sound_timer;
     uint8_t V[16];
-    uint8_t keys[16];
+    bool keyold[16];
+    bool keycur[16];
 } chip_8;
 
 
