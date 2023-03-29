@@ -201,7 +201,7 @@ int main() {
     while (!WindowShouldClose()) {
         GuiPanel((Rectangle) {0, 0, WIN_WIDTH, GUI_HEIGHT}, NULL);
         if (GuiButton((Rectangle) {0, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_PLAYER_PAUSE, NULL))) {
-            c8.running = false;
+            c8.running = !c8.running;
         }
 
         if (IsFileDropped() && !rom_loaded) {
@@ -224,15 +224,16 @@ int main() {
                      WHITE);
             EndDrawing();
         }
-        if (rom_loaded && c8.running) {
+        if (c8.running) {
             if (c8.delay_timer > 0) c8.delay_timer--;
             for (uint8_t k = 0; k < 16; k++) {
                 c8.keyold[k] = c8.keycur[k];
                 c8.keycur[k] = IsKeyDown(keyMapping[k]);
             }
-            for (int a = 0; a <= 8; a++) {
-                step(&c8);
-            }
+                for (int a = 0; a <= 8; a++) {
+                    step(&c8);
+                }
+            draw_sprite_ray(&c8);
         }
     }
     return 0;
