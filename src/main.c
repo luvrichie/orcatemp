@@ -5,91 +5,12 @@
 #include <graphics.h>
 
 #define RAYGUI_IMPLEMENTATION
+
 #include <raygui.h>
 #include <raylib.h>
 
-void updateInput(chip_8 *c) {
-    if (IsKeyDown(KEY_ONE)) {
-        c->keycur[0x1] = true;
-    } else if (IsKeyUp(KEY_ONE)) {
-        c->keycur[0x1] = false;
-    }
-    if (IsKeyDown(KEY_TWO)) {
-        c->keycur[0x2] = true;
-    } else if (IsKeyUp(KEY_TWO)) {
-        c->keycur[0x2] = false;
-    }
-    if (IsKeyDown(KEY_THREE)) {
-        c->keycur[0x3] = true;
-    } else if (IsKeyUp(KEY_THREE)) {
-        c->keycur[0x3] = false;
-    }
-    if (IsKeyDown(KEY_FOUR)) {
-        c->keycur[0xc] = true;
-    } else if (IsKeyUp(KEY_FOUR)) {
-        c->keycur[0xc] = false;
-    }
-    if (IsKeyDown(KEY_Q)) {
-        c->keycur[0x4] = true;
-    } else if (IsKeyUp(KEY_Q)) {
-        c->keycur[0x4] = false;
-    }
-    if (IsKeyDown(KEY_W)) {
-        c->keycur[0x5] = true;
-    } else if (IsKeyUp(KEY_W)) {
-        c->keycur[0x5] = false;
-    }
-    if (IsKeyDown(KEY_E)) {
-        c->keycur[0x6] = true;
-    } else if (IsKeyUp(KEY_E)) {
-        c->keycur[0x6] = false;
-    }
-    if (IsKeyDown(KEY_R)) {
-        c->keycur[0xd] = true;
-    } else if (IsKeyUp(KEY_R)) {
-        c->keycur[0xd] = false;
-    }
-    if (IsKeyDown(KEY_A)) {
-        c->keycur[0x7] = true;
-    } else if (IsKeyUp(KEY_A)) {
-        c->keycur[0x7] = false;
-    }
-    if (IsKeyDown(KEY_S)) {
-        c->keycur[0x8] = true;
-    } else if (IsKeyUp(KEY_S)) {
-        c->keycur[0x8] = false;
-    }
-    if (IsKeyDown(KEY_D)) {
-        c->keycur[0x9] = true;
-    } else if (IsKeyUp(KEY_D)) {
-        c->keycur[0x9] = false;
-    }
-    if (IsKeyDown(KEY_F)) {
-        c->keycur[0xE] = true;
-    } else if (IsKeyUp(KEY_F)) {
-        c->keycur[0xE] = false;
-    }
-    if (IsKeyDown(KEY_Z)) {
-        c->keycur[0xA] = true;
-    } else if (IsKeyUp(KEY_Z)) {
-        c->keycur[0xA] = false;
-    }
-    if (IsKeyDown(KEY_X)) {
-        c->keycur[0x0] = true;
-    } else if (IsKeyUp(KEY_X)) {
-        c->keycur[0x0] = false;
-    }
-    if (IsKeyDown(KEY_C)) {
-        c->keycur[0xB] = true;
-    } else if (IsKeyUp(KEY_C)) {
-        c->keycur[0xB] = false;
-    }
-    if (IsKeyDown(KEY_V)) {
-        c->keycur[0xF] = true;
-    } else if (IsKeyUp(KEY_V)) {
-        c->keycur[0xF] = false;
-    }
-}
+KeyboardKey keyMapping[16] = {KEY_X, KEY_ONE, KEY_TWO, KEY_THREE, KEY_Q, KEY_W, KEY_E, KEY_A, KEY_S, KEY_D, KEY_Z,
+                              KEY_C, KEY_FOUR, KEY_R, KEY_F, KEY_V};
 
 void init(chip_8 *c) {
     memset(c->memory, 0, MEMORY_SIZE);
@@ -109,8 +30,8 @@ void init(chip_8 *c) {
     c->delay_timer = 0;
     c->sound_timer = 0;
 
-    c->memory[0x1FF] = 5;
-    c->memory[0x1FE] = 1;
+    c->running = false;
+
     printf("[*] init finished!\n");
 }
 
@@ -119,7 +40,6 @@ void step(chip_8 *c) {
     uint8_t lo = c->memory[c->pc + 1];
     uint16_t full = (hi << 8) | lo;
     c->pc += 2;
-    printf("%p\n", full);
     switch (hi >> 4) {
         case 0x0:
             if (0x00E0 == full) {
@@ -279,35 +199,40 @@ int main() {
     SetTargetFPS(fps);
     bool rom_loaded = false;
     while (!WindowShouldClose()) {
+        GuiPanel((Rectangle) {0, 0, WIN_WIDTH, GUI_HEIGHT}, NULL);
+        if (GuiButton((Rectangle) {0, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_PLAYER_PAUSE, NULL))) {
+            c8.running = false;
+        }
+
         if (IsFileDropped() && !rom_loaded) {
             FilePathList dropped_files = LoadDroppedFiles();
             if (dropped_files.count == 1) {
-                rom_loaded = true;
                 load(&c8, dropped_files.paths[0]);
-                printf("%s", dropped_files.paths[0]);
+                GuiEnable();
+                rom_loaded = true;
+                c8.running = true;
             }
             UnloadDroppedFiles(dropped_files);
         }
         int font_size = 20;
         char text[] = "Drag and drop here";
         if (!rom_loaded) {
+            GuiDisable();
             BeginDrawing();
             ClearBackground(BLACK);
             DrawText(text, WIN_WIDTH / 2 - MeasureText(text, font_size) / 2, WIN_HEIGHT / 2 - font_size / 2, font_size,
                      WHITE);
             EndDrawing();
         }
-        if (rom_loaded) {
-            updateInput(&c8);
+        if (rom_loaded && c8.running) {
             if (c8.delay_timer > 0) c8.delay_timer--;
             for (uint8_t k = 0; k < 16; k++) {
                 c8.keyold[k] = c8.keycur[k];
-                c8.keycur[k] = IsKeyDown(k);
+                c8.keycur[k] = IsKeyDown(keyMapping[k]);
             }
             for (int a = 0; a <= 8; a++) {
                 step(&c8);
             }
-            draw_sprite_ray(&c8);
         }
     }
     return 0;

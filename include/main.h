@@ -3,16 +3,19 @@
 
 #ifndef ORCA_MAIN_H
 
-// chip-8 config
-#define MEMORY_SIZE 4096
+
+#define GUI_HEIGHT 32
+
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
+// chip-8 config
+#define MEMORY_SIZE 4096
 #define STACK_SIZE 12
 
 // graphical settings
 #define GFX_SCALE 10
-#define WIN_WIDTH SCREEN_WIDTH * GFX_SCALE
-#define WIN_HEIGHT SCREEN_HEIGHT * GFX_SCALE
+#define WIN_WIDTH (SCREEN_WIDTH * GFX_SCALE)
+#define WIN_HEIGHT ((SCREEN_HEIGHT * GFX_SCALE) + GUI_HEIGHT)
 // #define ON_COLOR
 // #define OFF_COLOR
 
@@ -51,6 +54,7 @@ typedef struct {
     uint8_t V[16];
     bool keyold[16];
     bool keycur[16];
+    bool running;
 } chip_8;
 
 
