@@ -199,6 +199,7 @@ int main() {
     SetTargetFPS(fps);
     bool rom_loaded = false;
     while (!WindowShouldClose()) {
+        BeginDrawing();
         GuiPanel((Rectangle) {0, 0, WIN_WIDTH, GUI_HEIGHT}, NULL);
         if (GuiButton((Rectangle) {0, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_PLAYER_PAUSE, NULL))) {
             c8.running = !c8.running;
@@ -218,11 +219,8 @@ int main() {
         char text[] = "Drag and drop here";
         if (!rom_loaded) {
             GuiDisable();
-            BeginDrawing();
-            ClearBackground(BLACK);
             DrawText(text, WIN_WIDTH / 2 - MeasureText(text, font_size) / 2, WIN_HEIGHT / 2 - font_size / 2, font_size,
                      WHITE);
-            EndDrawing();
         }
         if (c8.running) {
             if (c8.delay_timer > 0) c8.delay_timer--;
@@ -230,11 +228,12 @@ int main() {
                 c8.keyold[k] = c8.keycur[k];
                 c8.keycur[k] = IsKeyDown(keyMapping[k]);
             }
-                for (int a = 0; a <= 8; a++) {
-                    step(&c8);
-                }
+            for (int a = 0; a <= 8; a++) {
+                if (c8.running) step(&c8);
+            }
             draw_sprite_ray(&c8);
         }
+        EndDrawing();
     }
     return 0;
 }
