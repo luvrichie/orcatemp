@@ -5,6 +5,16 @@
 #include <graphics.h>
 
 #define RAYGUI_IMPLEMENTATION
+#define RAYGUI_CUSTOM_ICONS
+#include <iconset.h>
+
+#define foreach(item, array) \
+    for(int keep = 1, \
+            count = 0,\
+            size = sizeof (array) / sizeof *(array); \
+        keep && count != size; \
+        keep = !keep, count++) \
+      for(item = (array) + count; keep; keep = !keep)
 
 #include <raygui.h>
 #include <raylib.h>
@@ -40,6 +50,7 @@ void step(chip_8 *c) {
     uint8_t lo = c->memory[c->pc + 1];
     uint16_t full = (hi << 8) | lo;
     c->pc += 2;
+    printf("0x%04x\n", full);
     switch (hi >> 4) {
         case 0x0:
             if (0x00E0 == full) {
@@ -184,25 +195,71 @@ void load(chip_8 *c, char *filename) {
         exit(1);
     }
     fread(c->memory + PRG_ADDR, 1, size, fp);
+    fread(c->program, 1, size, fp);
     printf("[*] loaded ROM\n");
     fclose(fp);
 }
-
 int main() {
     printf("[*] warming up...\n");
 
     chip_8 c8;
     init(&c8);
 
+    memset(&c8.program, 0, MEMORY_SIZE);
+
     InitWindow(WIN_WIDTH, WIN_HEIGHT, "orca");
-    const float fps = 60.0f;
-    SetTargetFPS(fps);
+    SetTargetFPS(60);
     bool rom_loaded = false;
+    bool tweak_win = false;
     while (!WindowShouldClose()) {
         BeginDrawing();
         GuiPanel((Rectangle) {0, 0, WIN_WIDTH, GUI_HEIGHT}, NULL);
-        if (GuiButton((Rectangle) {0, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_PLAYER_PAUSE, NULL))) {
+
+        // load rom button
+        if (GuiButton((Rectangle) {0, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_FOLDER_FILE_OPEN, NULL))) {
+            printf("OPEN ROM");
+        }
+
+        // save / load state button
+        if (GuiButton((Rectangle) {GUI_HEIGHT, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_FILE_SAVE_CLASSIC, NULL))) {
+            printf("SAVE / LOAD STATE");
+        }
+
+        // OPERATION BUTTONS
+
+        // play/pause button
+        if (GuiButton((Rectangle) {WIN_WIDTH / 2 - GUI_HEIGHT * 1.5f, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(c8.running ? ICON_PLAYER_PAUSE : ICON_PLAYER_PLAY, NULL))) {
             c8.running = !c8.running;
+        }
+
+        // step into button
+        if (GuiButton((Rectangle) {WIN_WIDTH / 2 - GUI_HEIGHT / 2, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_STEP_INTO, NULL))) {
+            step(&c8);
+        }
+
+        // restart
+        if (GuiButton((Rectangle) {WIN_WIDTH / 2 + GUI_HEIGHT / 2, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_RESTART, NULL))) {
+            init(&c8);
+            memcpy(c8.program, c8.memory + PRG_ADDR, MEMORY_SIZE);
+            c8.running = true;
+        }
+
+        //float memory_usage = 0;
+        //foreach(uint8_t *v, c8.memory) {
+         //   if (*v != 0) memory_usage += 1;
+        //}
+        //GuiProgressBar((Rectangle){GUI_HEIGHT * 5, 0, GUI_HEIGHT * 3, GUI_HEIGHT}, NULL, "  MEMORY USAGE", (memory_usage / MEMORY_SIZE) * 100, 0, 100);
+        // char mem_text[] = "MEMORY USAGE";
+        // int mem_font_size = 1;
+        // DrawText(mem_text, (GUI_HEIGHT * 4) + MeasureText(mem_text, mem_font_size) / 6, GUI_HEIGHT / 2 - mem_foxnt_size, mem_font_size,
+        // WHITE);
+
+        if (GuiButton((Rectangle) {WIN_WIDTH - GUI_HEIGHT * 2, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_EYE_ON, NULL))) {
+            tweak_win = !tweak_win;
+        }
+
+        if (GuiButton((Rectangle) {WIN_WIDTH - GUI_HEIGHT, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_GEAR, NULL))) {
+            tweak_win = !tweak_win;
         }
 
         if (IsFileDropped() && !rom_loaded) {
@@ -228,12 +285,18 @@ int main() {
                 c8.keyold[k] = c8.keycur[k];
                 c8.keycur[k] = IsKeyDown(keyMapping[k]);
             }
-            for (int a = 0; a <= 8; a++) {
-                if (c8.running) step(&c8);
+            for (int a = 0; a <= 8 && c8.running; a++) {
+                step(&c8);
             }
-            draw_sprite_ray(&c8);
+        }
+        draw_sprite_ray(&c8);
+        if (tweak_win) {
+            if (GuiWindowBox((Rectangle){0, 0 + GUI_HEIGHT - 1, (SCREEN_WIDTH * GFX_SCALE) / 2, SCREEN_HEIGHT * GFX_SCALE}, "viewing tweaks")) {
+                tweak_win = !tweak_win;
+            }
         }
         EndDrawing();
     }
+    CloseWindow();
     return 0;
 }
