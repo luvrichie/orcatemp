@@ -196,6 +196,7 @@ void load(chip_8 *c, char *filename) {
     }
     fread(c->memory + PRG_ADDR, 1, size, fp);
     fread(c->program, 1, size, fp);
+    // c8.program isn't empty
     printf("[*] loaded ROM\n");
     fclose(fp);
 }
@@ -204,8 +205,6 @@ int main() {
 
     chip_8 c8;
     init(&c8);
-
-    memset(&c8.program, 0, MEMORY_SIZE);
 
     InitWindow(WIN_WIDTH, WIN_HEIGHT, "orca");
     SetTargetFPS(60);
@@ -240,19 +239,10 @@ int main() {
         // restart
         if (GuiButton((Rectangle) {WIN_WIDTH / 2 + GUI_HEIGHT / 2, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_RESTART, NULL))) {
             init(&c8);
-            memcpy(c8.program, c8.memory + PRG_ADDR, MEMORY_SIZE);
+            memcpy(c8.program, c8.memory + PRG_ADDR, MEMORY_SIZE - PRG_ADDR);
             c8.running = true;
+            // c8.program is empty
         }
-
-        //float memory_usage = 0;
-        //foreach(uint8_t *v, c8.memory) {
-         //   if (*v != 0) memory_usage += 1;
-        //}
-        //GuiProgressBar((Rectangle){GUI_HEIGHT * 5, 0, GUI_HEIGHT * 3, GUI_HEIGHT}, NULL, "  MEMORY USAGE", (memory_usage / MEMORY_SIZE) * 100, 0, 100);
-        // char mem_text[] = "MEMORY USAGE";
-        // int mem_font_size = 1;
-        // DrawText(mem_text, (GUI_HEIGHT * 4) + MeasureText(mem_text, mem_font_size) / 6, GUI_HEIGHT / 2 - mem_foxnt_size, mem_font_size,
-        // WHITE);
 
         if (GuiButton((Rectangle) {WIN_WIDTH - GUI_HEIGHT * 2, 0, GUI_HEIGHT, GUI_HEIGHT}, GuiIconText(ICON_EYE_ON, NULL))) {
             tweak_win = !tweak_win;
